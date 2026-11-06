@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f4f6f8">
+  <meta name="description" content="波長・膜厚・入射角を動かして、薄膜による光の干渉と反射時の位相変化を観察するシミュレーション。">
+  <title>薄膜による光の干渉</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23287974'/%3E%3Cpath d='M12 38h40M12 48h40M19 12l13 26 13-26' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <div class="identity"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 20h24M4 27h24M7 4l9 16L25 4"/></svg><h1>薄膜による光の干渉</h1></div>
+      <div class="view-controls">
+        <div class="segmented" role="group" aria-label="波の表示">
+          <button data-view="front" aria-pressed="true">平面波</button><button data-view="wave" aria-pressed="false">波形</button>
+        </div>
+        <div class="segmented small" id="wave-options" role="group" aria-label="反射光の波形" hidden>
+          <button data-composition="sum" aria-pressed="true">合成波</button><button data-composition="individual" aria-pressed="false">個別波</button>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="icon-button" id="play" aria-label="一時停止" title="一時停止"><svg viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></svg></button>
+        <button class="icon-button" id="reset" aria-label="初期状態に戻す" title="初期状態に戻す"><svg viewBox="0 0 24 24"><path d="M5 10a7 7 0 1 1 1 7M5 5v5h5"/></svg></button>
+        <button class="icon-button fullscreen" id="fullscreen" aria-label="全画面表示" title="全画面表示"><svg viewBox="0 0 24 24"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/></svg></button>
+        <button class="icon-button" id="help" aria-label="使い方と計算モデル" title="使い方と計算モデル"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 11v6M12 7v1"/></svg></button>
+      </div>
+    </header>
+
+    <section class="scene" aria-label="薄膜の干渉シミュレーション">
+      <canvas id="simulation" aria-label="上部からの入射光、薄膜の上面と下面で反射した光、その合成を表示。膜厚と入射角はスライダーでも操作できます。"></canvas>
+      <div class="scene-top">
+        <div class="result" aria-live="polite"><span class="status-dot" id="status-dot"></span><strong id="status">強め合う</strong><span class="intensity-bar"><i id="intensity-fill"></i></span></div>
+        <label class="marker-control"><input type="checkbox" id="marker"><span class="switch"></span><span>経路差</span></label>
+      </div>
+      <div class="metrics"><span>光路差 <b id="optical-path">—</b></span><span>位相差 <b id="phase">—</b></span></div>
+
+      <label class="medium medium-one" id="medium-one"><span>媒質 1</span><div><span>n₁</span><input id="n1" type="number" inputmode="decimal" min="0.5" max="2.5" step="0.01" value="1.00" aria-label="媒質1の屈折率"></div></label>
+      <label class="medium medium-two" id="medium-two"><span>媒質 2 <small>薄膜</small></span><div><span>n₂</span><input id="n2" type="number" inputmode="decimal" min="0.5" max="2.5" step="0.01" value="1.50" aria-label="媒質2の屈折率"></div></label>
+      <label class="medium medium-three" id="medium-three"><span>媒質 3</span><div><span>n₃</span><input id="n3" type="number" inputmode="decimal" min="0.5" max="2.5" step="0.01" value="1.00" aria-label="媒質3の屈折率"></div></label>
+      <div class="scene-bottom"><div class="legend" id="legend"><span><i></i>山</span><span><i class="dashed"></i>谷</span></div><span id="drag-hint">入射光・膜の下面をドラッグ</span></div>
+    </section>
+
+    <section class="parameters" aria-label="光と薄膜の設定">
+      <div class="parameter wavelength">
+        <div class="parameter-title"><label for="wavelength">波長 <span>λ</span></label><output id="wavelength-value" for="wavelength">550 <small>nm</small></output></div>
+        <input type="range" id="wavelength" min="380" max="750" step="1" value="550" aria-label="光の波長（真空中、nm）">
+        <div class="range-labels"><span>380</span><span>750 nm</span></div>
+      </div>
+      <div class="parameter">
+        <div class="parameter-title"><label for="thickness">膜厚 <span>d</span></label><output id="thickness-value" for="thickness">300 <small>nm</small></output></div>
+        <input type="range" id="thickness" min="0" max="1000" step="1" value="300" aria-label="薄膜の厚み（nm）">
+        <div class="range-labels"><span>0</span><span>1,000 nm</span></div>
+      </div>
+      <div class="parameter">
+        <div class="parameter-title"><label for="angle">入射角 <span>θ</span></label><output id="angle-value" for="angle">35 <small>°</small></output></div>
+        <input type="range" id="angle" min="0" max="70" step="1" value="35" aria-label="法線から測った光の入射角（度）">
+        <div class="range-labels"><span>0</span><span>70°</span></div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="help-dialog">
+    <div class="dialog-heading"><h2>観察のヒント</h2><button class="icon-button" id="close-help" aria-label="説明を閉じる">×</button></div>
+    <p>入射光の丸いハンドルで入射角を、薄膜の下面のハンドルで膜厚を動かせます。下部のスライダーはキーボードでも操作できます。</p>
+    <p>入射波は青、反射波は橙。色は光の経路を見分けるためのもので、波長の違いを表しません。平面波の実線は山、破線は谷です。反射光が強め合うほど、合成した波面が濃く太くなります。</p>
+    <p>波形では、①上面で直接反射する光と、②膜内を一往復する光を、同じ出射点で重ねています。屈折する場所では波形が一続きにつながります。「個別波」では下面反射を紫の破線で表示し、「合成波」では出射点の少し先から合成した波形を示します。波の振動は、境界に平行な向きに描いた模式表示です。</p>
+    <h3>光路差と反射</h3>
+    <p>光路差は <b>Δ = 2n₂d cos θ₂</b>。θ₂ は膜内の屈折角です。「経路差」をオンにすると、膜内の往復（黄）と、そこから差し引く上側の区間（桃）を示します。波形表示の桃色の区間は①の入射経路上にあります。真空中の波長 λ に対し、伝搬による位相差は 2πΔ/λ です。</p>
+    <p>屈折率が大きい側での反射は位相が π 変わり、小さい側での反射は変わりません。全反射では、入射角に応じた位相変化になります。</p>
+    <h3>このシミュレーションの範囲</h3>
+    <p>単色光・s 偏光の上面反射と、膜内を一往復した下面反射を合成する二光束モデルです。振幅はフレネル係数から計算し、多重反射は省略しています。バーはこの二光束が同位相のときを 1 とした相対強度です。完全に打ち消し合わない場合もあります。</p>
+    <p>図は光路を見やすくした模式図です。上面で全反射する条件では膜内の伝搬波を表示せず、下面で全反射する条件ではその反射位相を計算します。エバネッセント波・しみ出しは扱いません。</p>
+    <p class="source">原理の参考：<a href="https://openstax.org/books/university-physics-volume-3/pages/3-4-interference-in-thin-films" target="_blank" rel="noopener noreferrer">OpenStax · Interference in Thin Films</a></p>
+  </dialog>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

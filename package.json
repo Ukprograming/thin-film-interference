@@ -1,0 +1,12 @@
+{
+  "name": "thin-film-interference",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "授業用・薄膜による光の干渉シミュレーション",
+  "scripts": {
+    "dev": "node server.mjs",
+    "test": "node --test tests/physics.test.mjs",
+    "check": "node --check app.js"
+  }
+}
